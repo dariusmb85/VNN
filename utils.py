@@ -3,15 +3,30 @@ from scipy.sparse import csr_matrix
 from collections import defaultdict
 from keras.utils import Sequence
 import numpy as np
+import tensorflow.keras.backend as K
+from tensorflow.keras.callbacks import Callback
 
-def save_model_with_filename(model, neuron_nb, directory, epochs, batch, layer):
+# Returns Pearson Correlation
+def r2score(x, y):
+    xx = x - K.mean(x)
+    yy = y - K.mean(y)
+    x_norm = K.sqrt(K.sum(K.square(xx)))
+    y_norm = K.sqrt(K.sum(K.square(yy)))
+    # Calculate the dot product of the centered variables
+    dot_product = K.sum(xx * yy)
+    
+    return dot_product / (x_norm * y_norm)
+    
+# Builds filename structure
+def save_model_with_filename(model, neuron_nb, directory, label, percent, epochs, batch, layer):
     
     # Create the filename using the provided directory argument
-    filename = f'{directory}/rawData_{directory}_{epochs}epochs_{batch}1k_{neuron_nb}neurons_{layer}layers.h5'
+    filename = f'{directory}/{percent}_percent/rawData_{directory}_{label}_{epochs}epochs_{batch}k_{neuron_nb}neurons_{layer}layers.h5'
     
     # Save the model with the dynamic filename
     model.save(filename)
 
+# Builds binary matrix for input to model
 def create_binary_matrix(df, gene_col1, gene_col2):
     
     # Create a mapping of unique genes to column indices in the binary matrix
